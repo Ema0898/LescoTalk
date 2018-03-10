@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">LescoTalk</string>
+    <string name="textHint">Ingresa el Texto</string>
+    <string name="textToSpeechInitError">Función no soporta en tu dispositivo</string>
+    <string name="exitMessage">Presiona dos veces para salir</string>
+    <string name="welcome">Presioname para iniciar</string>
+    <string name="networkError">Debes conectarte a internet</string>
+    <string name="mainActivityMessage">Reproduciendo mensajes traducidos...</string>
+</resources>
