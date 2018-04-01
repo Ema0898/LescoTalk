@@ -6,18 +6,18 @@ def p_program(p):
     print("Program")
 
 def p_block(p):
-    '''block : word'''
+    '''block : word
+             | word word word word word
+             | word name'''
     print("Block")
-
-"""def p_sentence(p):
-    '''sentence : letter'''
-    print("Sentence")"""
 
 def p_word(p):
     '''word : letter
             | number
             | pronoun
-            | province'''
+            | province
+            | name
+            | empty'''
 
     print("Word")
 
@@ -58,14 +58,22 @@ def p_province(p):
                 | GUANACASTE
                 | LIMON'''
 
+def p_name(p):
+    '''name : MARCO'''
+    print("Name")
+
+def p_empty(p):
+    '''empty :'''
+    print("Empty")
+
 def p_error(p):
     print("Syntax Error Found!" + p)
 
 parser = yacc.yacc()
 
-while True:
+"""while True:
     try:
-        s = input(">> ")
+        s = input("<< ")
 
     except EOFError:
         break
@@ -76,4 +84,4 @@ while True:
             print(h)
 
     except:
-        print("Syntax Error")
+        print("Syntax Error")"""

@@ -5,14 +5,20 @@ tokens = [
     'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
     'EL', 'ELLA', 'USTED', 'USTEDES', 'NOSOTROS', 'ELLOS', 'ELLAS',
-    'SANJOSE', 'ALAJUELA', 'CARTAGO', 'HEREDIA', 'PUNTARENAS', 'GUANACASTE', 'LIMON'
+    'SANJOSE', 'ALAJUELA', 'CARTAGO', 'HEREDIA', 'PUNTARENAS', 'GUANACASTE', 'LIMON',
+    'MARCO'
 ]
-
-t_ignore = r' '
 
 outputList = []
 
-#  r'\b1011\.\b23[0-9]'
+t_ignore = r' '
+
+def t_MARCO(t):
+    r'\b110\ \b110'
+    global outputList
+    outputList += ["MARCO"]
+    return t
+
 def t_A(t):
     r'\b1011\.\b23[0-9]5'
     global outputList
@@ -93,13 +99,15 @@ def t_error(t):
 
 lex = lex.lex()
 
-"""lex.input("1 0")
+lex.input("110 110")
 
-while True:
+"""while True:
     tok = lex.token()
 
     if not tok:
         break
+
+    print(tok)
 
 for h in outputList:
     print(h)"""
