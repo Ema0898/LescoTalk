@@ -1,6 +1,17 @@
 import cv2
 import numpy as np
 from csv_managment import comparate_with_database
+import socket
+
+adress = '0.0.0.0'
+port = 8081
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.bind((adress, port))
+sock.listen(1)
+
+connections = []
+withAndroid = False
 
 finger_position_list = [[], []]
 
@@ -10,6 +21,20 @@ def string(vec):
         result += str(i) + "!"
 
     return result
+
+def send(message):
+    for connection in connections:
+        connection.send(bytes(message + "\n", 'utf-8'))
+
+if (withAndroid):
+    print("Waiting for connections")
+    while True:
+        client, a = sock.accept()
+        connections.append(client)
+        break
+
+    print("Connected")
+    print(connections)
 
 cap = cv2.VideoCapture(0)
 _, img3 = cap.read()
@@ -34,16 +59,16 @@ while (cap.isOpened()):
     yellow_upper = np.array([30, 255, 255], np.uint8)
 
     # defining the range of purple color
-    purple_lower = np.array([135, 40, 61], np.uint8)
-    purple_upper = np.array([152, 70, 100], np.uint8)
+    purple_lower = np.array([124, 18, 91], np.uint8)
+    purple_upper = np.array([152, 45, 140], np.uint8)
 
     # defining the range of green color
     green_lower = np.array([78, 100, 100], np.uint8)
     green_upper = np.array([96, 200, 200], np.uint8)
 
     # defining the range of black color
-    black_lower = np.array([0, 0, 65], np.uint8)
-    black_upper = np.array([120, 70, 71], np.uint8)
+    black_lower = np.array([0, 0, 0], np.uint8)
+    black_upper = np.array([120, 60, 61], np.uint8)
 
     # defining the range of oragen color
     orange_lower = np.array([8, 90, 96], np.uint8)
@@ -93,7 +118,7 @@ while (cap.isOpened()):
             x, y, w, h = cv2.boundingRect(contour)
             img2 = cv2.rectangle(img2, (x, y), (x + w, y + h), (0, 0, 255), 2)
             red_objects.append([x + w / 2, y + h / 2])
-            cv2.putText(img2, "RED color", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255))
+            cv2.putText(img2, "RED", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255))
 
     # Tracking the Blue Color
     contador = 0
@@ -104,7 +129,7 @@ while (cap.isOpened()):
             x, y, w, h = cv2.boundingRect(contour)
             img2 = cv2.rectangle(img2, (x, y), (x + w, y + h), (0, 0, 255), 2)
             blue_objects.append([x + w / 2, y + h / 2])
-            cv2.putText(img2, "BLUE color", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0))
+            cv2.putText(img2, "BLUE", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0))
 
     # Tracking the YELLOW Color
     contador = 0
@@ -115,7 +140,7 @@ while (cap.isOpened()):
             x, y, w, h = cv2.boundingRect(contour)
             img2 = cv2.rectangle(img2, (x, y), (x + w, y + h), (0, 0, 255), 2)
             yellow_objects.append([x + w / 2, y + h / 2])
-            cv2.putText(img2, "YELLLOW color", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
+            cv2.putText(img2, "YELLLOW", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
 
     # Tracking the purple Color
     contador = 0
@@ -126,7 +151,7 @@ while (cap.isOpened()):
             x, y, w, h = cv2.boundingRect(contour)
             img2 = cv2.rectangle(img2, (x, y), (x + w, y + h), (255, 0, 255), 2)
             purple_objects.append([x + w / 2, y + h / 2])
-            cv2.putText(img2, "purple color", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
+            cv2.putText(img2, "PURṔLE", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
 
     # Tracking the green Color
     contador = 0
@@ -137,7 +162,7 @@ while (cap.isOpened()):
             x, y, w, h = cv2.boundingRect(contour)
             img2 = cv2.rectangle(img2, (x, y), (x + w, y + h), (255, 0, 255), 2)
             green_objects.append([x + w / 2, y + h / 2])
-            cv2.putText(img2, "green color", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
+            cv2.putText(img2, "GREEN", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
 
     # Tracking the black Color
     contador = 0
@@ -148,7 +173,7 @@ while (cap.isOpened()):
             x, y, w, h = cv2.boundingRect(contour)
             img2 = cv2.rectangle(img2, (x, y), (x + w, y + h), (255, 0, 255), 2)
             black_objects.append([x + w / 2, y + h / 2])
-            cv2.putText(img2, "black color", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
+            cv2.putText(img2, "BLACK", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
 
     # Tracking the orange Color
     contador = 0
@@ -159,12 +184,7 @@ while (cap.isOpened()):
             x, y, w, h = cv2.boundingRect(contour)
             img2 = cv2.rectangle(img2, (x, y), (x + w, y + h), (255, 0, 255), 2)
             orange_objects.append([x + w / 2, y + h / 2])
-            cv2.putText(img2, "orange color", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
-
-    """print("red\t\tblue\t\tyellow\t\tgreen\t\tpurple\t\torange\t\tblack")
-    print(str(len(red_objects)) + "\t\t" + str(len(blue_objects)) + "\t\t" + str(len(yellow_objects)) + "\t\t" +
-          str(len(green_objects)) + "\t\t" + str(len(purple_objects)) + "\t\t" + str(len(orange_objects))
-          + "\t\t" + str(len(black_objects)))"""
+            cv2.putText(img2, "ORANGE", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
 
     if red_objects:
         finger_position_list[0].append(red_objects[0][0])
@@ -216,14 +236,15 @@ while (cap.isOpened()):
         finger_position_list[1].append(0)
 
     #print(a)
-
-    dev=1
+    dev = 1
     if (dev == 0):
         print(string(finger_position_list[0]), string(finger_position_list[1]))
     else:
         if finger_position_list[0] != [] and finger_position_list[1] !=[]:
             try:
-                print(comparate_with_database(finger_position_list[0], finger_position_list[1]))
+                final_sentence = comparate_with_database(finger_position_list[0], finger_position_list[1])
+                #send(final_sentence)
+                print(final_sentence)
             except:
                 print("Error")
                 pass
