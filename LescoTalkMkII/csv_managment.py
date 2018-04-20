@@ -31,7 +31,7 @@ def magnitude(x):
 
 def angle(x, y):
     a = in_product(x, y) / (magnitude(x) * (magnitude(y)))
-    if 0.992 < a < 1.1:
+    if 0.992 < a < 1.3:
         return 0
     return math.acos(in_product(x, y) / (magnitude(x) * (magnitude(y))))
 

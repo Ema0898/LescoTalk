@@ -19,6 +19,8 @@ counter = 0
 salidaFinal = ""
 isSend = False
 mensaje = ""
+x1, y1, x2, y2 = 0,0,0,0
+
 
 def string(vec):
     result = ""
@@ -43,15 +45,115 @@ if (withAndroid):
     print(connections)
 
 cap = cv2.VideoCapture(0)
+
+
+muestras = 0
+vecmin , vecmax = [999,999,999] , [0,0,0]
+mousex , mousey = -1,-1
+
+
+def mouseclic(event,x,y,flags,param):
+    global muestras , vecmax , vecmin
+    if event == cv2.EVENT_LBUTTONUP:
+        pixelbrg = img3[y,x]
+        pixelnp = np.uint8([ [ pixelbrg ] ] )
+        pixelhsv = cv2.cvtColor(pixelnp,cv2.COLOR_BGR2HSV)
+        pixelvec = pixelhsv[0][0]
+        if (pixelvec[0] > vecmax[0]):
+            vecmax[0] = pixelvec[0] 
+        if (pixelvec[1] > vecmax[1]):
+            vecmax[1] = pixelvec[1] 
+        if (pixelvec[2] > vecmax[2]):
+            vecmax[2] = pixelvec[2] 
+        if (pixelvec[0] < vecmin[0]):
+            vecmin[0] = pixelvec[0] 
+        if (pixelvec[1] < vecmin[1]):
+            vecmin[1] = pixelvec[1] 
+        if (pixelvec[2] < vecmin[2]):
+            vecmin[2] = pixelvec[2] 
+        muestras +=1
+
+
+
+_, img3 = cap.read()
+
+
+red_lower, red_upper , blue_lower , blue_upper, green_lower , green_upper , purple_lower, purple_upper 
+    yellow_lower , yellow_upper , orange_lower , orange_upper , black_lower , black_upper = 0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
+while (cap.isOpened()):
+    cv2.imshow("Calibration", img3)
+    cv2.setMouseCallback('Calibration',mouseclic)
+
+    if muestras == 3:
+        blue_lower = np.array(vecmin, np.uint8)
+        blue_upper = np.array(vecmax, np.uint8)
+        vecmin = [999,999,999] 
+        vecmax = [0,0,0]
+    if muestras == 6:
+        purple_lower = np.array(vecmin, np.uint8)
+        purple_upper = np.array(vecmax, np.uint8)
+        vecmin = [999,999,999] 
+        vecmax = [0,0,0]
+    if muestras == 9:
+        red_lower = np.array(vecmin, np.uint8)
+        red_upper = np.array(vecmax, np.uint8)
+        vecmin = [999,999,999] 
+        vecmax = [0,0,0]
+    if muestras == 12:
+        green_lower = np.array(vecmin, np.uint8)
+        green_upper = np.array(vecmax, np.uint8)
+        vecmin = [999,999,999] 
+        vecmax = [0,0,0]
+    if muestras == 15:
+        yellow_lower = np.array(vecmin, np.uint8)
+        yellow_upper = np.array(vecmax, np.uint8)
+        vecmin = [999,999,999] 
+        vecmax = [0,0,0]
+    if muestras == 18:
+        black_lower = np.array(vecmin, np.uint8)
+        black_upper = np.array(vecmax, np.uint8)
+        vecmin = [999,999,999] 
+        vecmax = [0,0,0]
+    
+    
+    
+    
+    
+
+
+
+    k = cv2.waitKey(10)
+    if k == 8:
+        break
+    
 _, img3 = cap.read()
 
 while (cap.isOpened()):
-    _, img2 = cap.read()
+    cv2.imshow("Calibration", img3)
+    cv2.setMouseCallback('Calibration',mouseclic)
+    
+    if muestras == 21:
+        orange_lower = np.array(vecmin, np.uint8)
+        orange_upper = np.array(vecmax, np.uint8)
+        vecmin = [999,999,999] 
+        vecmax = [0,0,0]
+
+    k = cv2.waitKey(10)
+    if k == 8:
+        break
+
+
+
+while (cap.isOpened()):
+    _, frame = cap.read()
 
     # converting frame (img2 i.e BGR) to HSV (hue-saturation-value)
 
-    hsv = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
-
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    horizontal = 0
+    vertical = 0
+    '''
         # defining the range of red color
     red_lower = np.array([175, 130, 51], np.uint8)
     red_upper = np.array([180, 180, 100], np.uint8)
@@ -79,7 +181,8 @@ while (cap.isOpened()):
     # defining the range of oragen color
     orange_lower = np.array([3, 130, 120], np.uint8)
     orange_upper = np.array([15, 170, 160], np.uint8)
-
+    '''
+'''
     # finding the range of red,blue and yellow color in the image
     red = cv2.inRange(hsv, red_lower, red_upper)
     blue = cv2.inRange(hsv, blue_lower, blue_upper)
@@ -192,6 +295,233 @@ while (cap.isOpened()):
             orange_objects.append([x + w / 2, y + h / 2])
             cv2.putText(img2, "ORANGE", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
 
+'''
+
+    # finding the range of red,blue and yellow color in the image
+    red = cv2.inRange(hsv, red_lower, red_upper)
+    blue = cv2.inRange(hsv, blue_lower, blue_upper)
+    yellow = cv2.inRange(hsv, yellow_lower, yellow_upper)
+    purple = cv2.inRange(hsv, purple_lower, purple_upper)
+    green = cv2.inRange(hsv, green_lower, green_upper)
+    black = cv2.inRange(hsv, black_lower, black_upper)
+    orange = cv2.inRange(hsv, orange_lower, orange_upper)
+
+    #Morphological transformation, Dillation
+    red = cv2.threshold(red, 25, 255, cv2.THRESH_BINARY)[1]
+    red = cv2.dilate(red, None, iterations=2)
+
+    blue = cv2.threshold(blue, 25, 255, cv2.THRESH_BINARY)[1]
+    blue = cv2.dilate(blue, None, iterations=2)
+    
+    yellow = cv2.threshold(yellow, 25, 255, cv2.THRESH_BINARY)[1]
+    yellow = cv2.dilate(yellow, None, iterations=2)
+    
+    purple = cv2.threshold(purple, 25, 255, cv2.THRESH_BINARY)[1]
+    purple = cv2.dilate(purple, None, iterations=2)
+    
+    green = cv2.threshold(green, 25, 255, cv2.THRESH_BINARY)[1]
+    green = cv2.dilate(green, None, iterations=2)
+    
+    black = cv2.threshold(black, 25, 255, cv2.THRESH_BINARY)[1]
+    black = cv2.dilate(black, None, iterations=2)
+
+    orange = cv2.threshold(orange, 25, 255, cv2.THRESH_BINARY)[1]
+    orange = cv2.dilate(orange, None, iterations=2)
+
+    red_objects, blue_objects, yellow_objects, green_objects, orange_objects, purple_objects, black_objects = [], [], [], [], [], [], []
+
+    #Tracking the Red Color
+ 
+    contornosimg = red.copy()
+    im, contornos, hierarchy = cv2.findContours(contornosimg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    xr = 0
+    yr = 0
+    for c in contornos:
+        # Eliminamos los contornos más pequeños
+        if (cv2.contourArea(c) < 200):
+            continue
+        # Obtenemos el bounds del contorno, el rectángulo mayor que engloba al contorno
+        elif(cv2.contourArea(c) > 2000):
+            continue
+        else:
+            (x, y, w, h) = cv2.boundingRect(c)
+            # Dibujamos el rectángulo del bounds
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+            red_objects.append([x+w/2 , y+h/2])
+            cv2.putText(frame,"RED color",(x,y),cv2.FONT_HERSHEY_SIMPLEX,0.7,(0,0,255))
+            xr = x
+            yr = y
+        
+    contornosimg = blue.copy()
+    im, contornos, hierarchy = cv2.findContours(contornosimg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    xb = 0
+    yb = 0
+    for c in contornos:
+        # Eliminamos los contornos más pequeños
+        if (cv2.contourArea(c) < 200):
+            continue
+        # Obtenemos el bounds del contorno, el rectángulo mayor que engloba al contorno
+        elif(cv2.contourArea(c) > 2000):
+            continue
+        else:
+            (x, y, w, h) = cv2.boundingRect(c)
+            # Dibujamos el rectángulo del bounds
+            cv2.rectangle(frame, (x, y), (x +w, y+h), (255, 0, 0), 2)
+            blue_objects.append([(x + w)/2 , (y+h)/2])
+            xb = x
+            yb = y
+            cv2.putText(frame,"BLUE color",(x,y),cv2.FONT_HERSHEY_SIMPLEX,0.7,(255,0,0))
+
+            
+
+    #Tracking the YELLOW Color
+    
+    contornosimg = yellow.copy()
+    im, contornos, hierarchy = cv2.findContours(contornosimg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    for c in contornos:
+        # Eliminamos los contornos más pequeños
+        if (cv2.contourArea(c) < 200):
+            continue
+        # Obtenemos el bounds del contorno, el rectángulo mayor que engloba al contorno
+        elif(cv2.contourArea(c) > 2000):
+            continue
+        else:
+            (x, y, w, h) = cv2.boundingRect(c)
+            # Dibujamos el rectángulo del bounds
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            yellow_objects.append([x+w/2 , y+h/2])
+            cv2.putText(frame,"YELLLOW color",(x,y),cv2.FONT_HERSHEY_SIMPLEX,1,(255,0,0))
+            
+
+
+    #Tracking the purple Color
+    contornosimg = purple.copy()
+    im, contornos, hierarchy = cv2.findContours(contornosimg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    for c in contornos:
+        # Eliminamos los contornos más pequeños
+        if (cv2.contourArea(c) < 200):
+            continue
+        # Obtenemos el bounds del contorno, el rectángulo mayor que engloba al contorno
+        elif(cv2.contourArea(c) > 2000):
+            continue
+        else:
+            (x, y, w, h) = cv2.boundingRect(c)
+            # Dibujamos el rectángulo del bounds
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255,0,255),2)
+            purple_objects.append([x+w/2 , y+h/2])
+            cv2.putText(frame,"purple color",(x,y),cv2.FONT_HERSHEY_SIMPLEX,1,(255,0,0))
+    
+          
+
+    #Tracking the green Color
+    
+    contornosimg = green.copy()
+    im, contornos, hierarchy = cv2.findContours(contornosimg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    for c in contornos:
+        # Eliminamos los contornos más pequeños
+        if (cv2.contourArea(c) < 200):
+            continue
+        # Obtenemos el bounds del contorno, el rectángulo mayor que engloba al contorno
+        elif(cv2.contourArea(c) > 2000):
+            continue
+        else:
+            (x, y, w, h) = cv2.boundingRect(c)
+            # Dibujamos el rectángulo del bounds
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255,0,255),2)
+            green_objects.append([x+w/2 , y+h/2])
+            cv2.putText(frame,"green color",(x,y),cv2.FONT_HERSHEY_SIMPLEX,1,(255,0,0))
+    
+            
+
+    #Tracking the black Color
+    
+    contornosimg = black.copy()
+    im, contornos, hierarchy = cv2.findContours(contornosimg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    for c in contornos:
+        # Eliminamos los contornos más pequeños
+        if (cv2.contourArea(c) < 200):
+            continue
+        # Obtenemos el bounds del contorno, el rectángulo mayor que engloba al contorno
+        elif(cv2.contourArea(c) > 2000):
+            continue
+        else:
+            (x, y, w, h) = cv2.boundingRect(c)
+            # Dibujamos el rectángulo del bounds
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255,0,255),2)
+            black_objects.append([x+w/2 , y+h/2])
+            cv2.putText(frame,"black color",(x,y),cv2.FONT_HERSHEY_SIMPLEX,1,(255,0,0))
+    
+             
+
+    #Tracking the orange Color
+    
+    
+    
+    
+   
+    contornosimg = orange.copy()
+    im, contornos, hierarchy = cv2.findContours(contornosimg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    for c in contornos:
+        # Eliminamos los contornos más pequeños
+        if (cv2.contourArea(c) < 200):
+            continue
+        # Obtenemos el bounds del contorno, el rectángulo mayor que engloba al contorno
+        elif(cv2.contourArea(c) > 2000):
+            continue
+        else:
+            (x, y, w, h) = cv2.boundingRect(c)
+            # Dibujamos el rectángulo del bounds
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255,0,255),2)
+            orange_objects.append([x+w/2 , y+h/2])
+            cv2.putText(frame,"orange color",(x,y),cv2.FONT_HERSHEY_SIMPLEX,1,(255,0,0))
+
+    
+    
+    
+    if(xb==0):
+        if(xr>(x1+30) or xr<(x1-30)):
+            if(x1<xr):
+                cv2.putText(frame,"Izquierda", (300, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, 2)
+                horizontal = -1
+            else: 
+                cv2.putText(frame,"Derecha", (300, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, 2)
+                horizontal = 1
+            x1 = xr
+        
+        if(yr>(y1+30) or yr<(y1-30)):
+            if(y1<yr):
+                cv2.putText(frame,"Abajo", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, 2)
+                vertical = -1
+            else:
+                cv2.putText(frame,"Arriba", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, 2)
+                vertical = 1
+            y1 = yr
+            
+            
+            
+    if(xb != 0):
+        if(xb>(x2+30) or xb<(x2-30)):
+            if(x1<xb):
+                cv2.putText(frame,"Izquierda", (300, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, 2)
+                horizontal = -1
+            else: 
+                cv2.putText(frame,"Derecha", (300, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, 2)
+                horizontal = 1
+            x2 = xb
+        
+        if(yb>(y2+30) or yb<(y2-30)):
+            if(y2<yr):
+                cv2.putText(frame,"Abajo", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, 2)
+                vertical = -1
+            else:
+                cv2.putText(frame,"Arriba", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, 2)
+                vertical = 1
+            y2 = yb
+        
+    
+
+    #########################################################################################
+
     if red_objects:
         finger_position_list[0].append(red_objects[0][0])
         finger_position_list[1].append(red_objects[0][1])
@@ -241,6 +571,10 @@ while (cap.isOpened()):
         finger_position_list[0].append(0)
         finger_position_list[1].append(0)
 
+    finger_position_list[0].append(horizontal)
+    finger_position_list[1].append(vertical)
+
+
     dev = 1
     if (dev == 0):
         print(string(finger_position_list[0]), string(finger_position_list[1]))
@@ -287,8 +621,8 @@ while (cap.isOpened()):
     finger_position_list = [[], []]
     #cv2.putText(img2, 'hola', (100, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
     
-    cv2.imshow("Color Tracking", img2)
-    #cv2.imshow("Color", img3)
+    cv2.imshow("Color Tracking", frame)
+    
 
     k = cv2.waitKey(10)
     if k == 27:
